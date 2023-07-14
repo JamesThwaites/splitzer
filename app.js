@@ -28,6 +28,9 @@ function bh_jump() {
         }
         player.bh.grounded = false;
     }
+    if (player.connected) {
+        player.th.yv = player.bh.yv
+    }
     console.log('bhjump:', player.th.yv, player.bh.yv)
 }
 
@@ -39,6 +42,8 @@ function th_jump() {
         } else {
             player.th.yv += -8
         }
+
+        
         
         console.log(player.connected)
         player.connected = false;
@@ -47,11 +52,20 @@ function th_jump() {
     console.log('thjump:', player.th.yv, player.bh.yv)
 }
 
-function check_collision(old_x, old_y, new_x, new_y, platform) {
+function check_collision(old_x, old_y, new_x, new_y, platform, top_half) {
     p_s = platform.x - platform.w/2
     p_e = platform.x + platform.w/2
     //console.log(platform.y)
+
     if (new_x < p_s || new_x > p_e) {
+        return -1
+    }
+
+    if (top_half && platform.type == 1) {
+        return -1
+    }
+
+    if (!top_half && platform.type == 2) {
         return -1
     }
 
@@ -63,7 +77,7 @@ function check_collision(old_x, old_y, new_x, new_y, platform) {
         return -2
     }
 
-    if ((new_y > platform.y + platform.h/2 && old_y < platform.y) || (new_y < platform.y - platform.h2 && old_y > platform.y)) {
+    if ((new_y <= platform.y + platform.h/2 && old_y > platform.y + platform.h/2) || (new_y >= platform.y - platform.h/2 && old_y < platform.y - platform.h/2)) {
         return -2
     }
 
@@ -88,13 +102,21 @@ const player = {
 let xpos = 50;
 
 class Platform {
-    constructor (x, y, w, h) {
+    constructor (x, y, w, h, t) {
         this.x = x;
         this.y = y;
         this.w = w;
         this.h = h;
         this.rect = two.makeRectangle(x,y,w,h);
-        this.rect.fill = rgb(50,50,50);
+        if (t == 1) {
+            this.rect.fill = rgb(200,50,50);
+        }
+        else if (t == 2) {
+            this.rect.fill = rgb(50,50,200);
+        } else {
+            this.rect.fill = rgb(50,50,50);
+        }
+        this.type = t;
     }
 }
 
@@ -107,10 +129,14 @@ let th_sprite = two.makeSprite('resc/sprites/sth.png',50,0,6,1,10,true);
 console.log(bh_sprite)
 
 const platforms = [];
-platforms.push(new Platform(500,400,300,18))
-platforms.push(new Platform(800,300,300,18))
-platforms.push(new Platform(1200,400,300,18))
-platforms.push(new Platform(2000,300,300,18))
+platforms.push(new Platform(500,400,300,18, 0))
+platforms.push(new Platform(800,300,300,18, 2))
+platforms.push(new Platform(800,360,300,18, 1))
+platforms.push(new Platform(1200,400,300,18, 1))
+platforms.push(new Platform(1400,380,300,18, 2))
+platforms.push(new Platform(2000,300,300,18, 0))
+// platforms.push(new Platform(1600,400,2000,18,0))
+// platforms.push(new Platform(1900,350,2000,18,0))
 
 
 //console.log(platforms[0])
@@ -155,9 +181,9 @@ function update(frameCount) {
 
     for (p of platforms) {
         //console.log(p)
-        r = check_collision(xpos, player.bh.y, xpos+hspeed, newbh, p)
+        r = check_collision(xpos, player.bh.y, xpos+hspeed, newbh, p, false)
         if (r == -2) {
-            //console.log('cd')
+            console.log('bottom died')
         }
         else if (r == -1) {
             //console.log('dd')
@@ -165,19 +191,21 @@ function update(frameCount) {
 
         else {
             //console.log(bhfloor, newbh, p.y)
-            if (newbh > p.y) {
-                bhroof = Math.max(bhroof, p.y + p.h/2)
+            if (player.bh.y + 8 > p.y) {
+                //console.log(1, bhfloor)
+                bhroof = Math.max(bhroof, p.y + p.h/2 - 8)
             } else {
-                bhfloor = Math.min(bhfloor, p.y - p.h/2 - 34)
-                console.log(bhfloor)
+                //console.log(2, bhfloor)
+                bhfloor = Math.min(bhfloor, p.y - p.h/2 - 32)
+                //console.log(bhfloor)
             }
             //console.log(bhfloor, p.y - p.h/2)
         }
         
 
-        r = check_collision(xpos, player.th.y, xpos+hspeed, newth, p)
+        r = check_collision(xpos, player.th.y, xpos+hspeed, newth, p, true)
         if (r == -2) {
-            //console.log('cd')
+            console.log('top died')
         }
         else if (r == -1) {
             //console.log('dd')
@@ -198,19 +226,22 @@ function update(frameCount) {
     }
 
     newbh = Math.min(player.bh.y + player.bh.yv,bhfloor);
-    newth = Math.min(player.th.y + player.th.yv,thfloor);
-    newbh = Math.max(newbh, bhroof);
+    newth = Math.min(player.th.y + player.th.yv,thfloor, newbh);
+    
     newth = Math.max(newth, throof);
+    newbh = Math.max(newbh, bhroof, newth);
+
+    //console.log(bhroof, bhfloor)
+
     //console.log(player.th.y)
     xpos += hspeed
     player.bh.y = newbh
     player.th.y = newth
     
-
-    if (player.connected == true) {
-        player.th.y = player.bh.y;
-        player.th.yv = player.bh.yv;
-    }
+    // if (player.connected == true) {
+    //     player.th.y = player.bh.y;
+    //     player.th.yv = player.bh.yv;
+    // }
 
     bh_sprite.position.y = player.bh.y
     th_sprite.position.y = player.th.y
@@ -223,10 +254,14 @@ function update(frameCount) {
         }
         player.connected = true;
         player.th.yv = player.bh.yv;
+
+    } else {
+        player.connected = false;
     }
     if (player.th.y == thfloor) {
         player.th.grounded = true;
-        if (player.connected == false) {
+        if (player.connected == false && player.th.yv > 0) {
+            //console.log('triggered')
             player.th.yv = 0;
         }
 
