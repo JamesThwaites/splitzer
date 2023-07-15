@@ -251,6 +251,10 @@ function update(frameCount) {
 
     bh_sprite.position.y = player.bh.y
     th_sprite.position.y = player.th.y
+    if (player.th.y - player.bh.y < 5 && player.th.hanging) { // shitty graphics workaround
+        bh_sprite.position.y -= 2
+    }
+    //console.log(player.th.y, player.bh.y)
 
 
 
@@ -263,7 +267,7 @@ function update(frameCount) {
             bh_sprite.stop()
             th_sprite.play(0,5)
             bh_sprite.play(0,5)
-            console.log('recon', player.th.yv, player.bh.yv)
+            console.log('recon', player.th.yv, player.bh.yv, player.th.y, player.bh.y)
         }
         player.connected = true;
         player.th.yv = player.bh.yv;
