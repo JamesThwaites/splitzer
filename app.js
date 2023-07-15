@@ -151,7 +151,6 @@ window.addEventListener("contextmenu", (event) => {
 })
 
 window.addEventListener("click", (event) => {
-    //console.log(player.bh.grounded, player.connected)
     bh_jump();
 })
 
@@ -173,33 +172,23 @@ function update(frameCount) {
     bhroof = 0
     bhfloor = height-36
     throof = 0
-    //console.log(player.bh.y + player.bh.yv,bhfloor)
     newbh = Math.min(player.bh.y + player.bh.yv,bhfloor);
     newth = Math.min(player.th.y + player.th.yv,newbh);
-    //console.log(newth)
     thfloor = newbh
 
     for (p of platforms) {
-        //console.log(p)
         r = check_collision(xpos, player.bh.y, xpos+hspeed, newbh, p, false)
         if (r == -2) {
             console.log('bottom died')
         }
         else if (r == -1) {
-            //console.log('dd')
         }
-
         else {
-            //console.log(bhfloor, newbh, p.y)
             if (player.bh.y + 8 > p.y) {
-                //console.log(1, bhfloor)
                 bhroof = Math.max(bhroof, p.y + p.h/2 - 8)
             } else {
-                //console.log(2, bhfloor)
                 bhfloor = Math.min(bhfloor, p.y - p.h/2 - 32)
-                //console.log(bhfloor)
             }
-            //console.log(bhfloor, p.y - p.h/2)
         }
         
 
@@ -208,16 +197,13 @@ function update(frameCount) {
             console.log('top died')
         }
         else if (r == -1) {
-            //console.log('dd')
         }
-
         else {
-            if (newth > p.y) {
+            if (player.th.y > p.y) {
                 throof = Math.max(throof, p.y + p.h/2 + 3)
             } else {
                 
                 thfloor = Math.min(thfloor, p.y - p.h/2 - 15)
-                //console.log(thfloor, p.y)
             }
         }
         
@@ -227,21 +213,13 @@ function update(frameCount) {
 
     newbh = Math.min(player.bh.y + player.bh.yv,bhfloor);
     newth = Math.min(player.th.y + player.th.yv,thfloor, newbh);
-    
     newth = Math.max(newth, throof);
     newbh = Math.max(newbh, bhroof, newth);
 
-    //console.log(bhroof, bhfloor)
 
-    //console.log(player.th.y)
     xpos += hspeed
     player.bh.y = newbh
     player.th.y = newth
-    
-    // if (player.connected == true) {
-    //     player.th.y = player.bh.y;
-    //     player.th.yv = player.bh.yv;
-    // }
 
     bh_sprite.position.y = player.bh.y
     th_sprite.position.y = player.th.y
@@ -261,13 +239,12 @@ function update(frameCount) {
     if (player.th.y == thfloor) {
         player.th.grounded = true;
         if (player.connected == false && player.th.yv > 0) {
-            //console.log('triggered')
             player.th.yv = 0;
         }
-
     } else {
         player.th.grounded = false;
     }
+
     if (player.bh.y == bhfloor) {
         player.bh.grounded = true;
         player.bh.yv = 0;
