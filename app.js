@@ -274,6 +274,9 @@ function update(frameCount) {
         player.th.yv = player.bh.yv;
 
     } else {
+        if (player.connected == true) {
+            th_sprite.play(6,11);
+        }
         player.connected = false;
     }
 
