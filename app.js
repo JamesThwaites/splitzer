@@ -2,9 +2,15 @@ const width = 800;
 const height = 500;
 const hspeed = 2;
 const dilation = 0.1;
+const start_height = 300;
+const gravity = 0.2;
+const floor = 260;
 
+let clicking = false;
+let xpos = 50;
 let top_jump_down = false;
 let bottom_jump_down = false;
+
 
 let params = {
     width: width,
@@ -93,13 +99,13 @@ function check_collision(old_x, old_y, new_x, new_y, platform, top_half) {
 
 const player = {
     th: {
-        y: 460,
+        y: start_height,
         yv: 0,
         grounded: false,
         hanging: false
     },
     bh: {
-        y: 460,
+        y: start_height,
         yv: 0,
         grounded: false
     },
@@ -107,7 +113,7 @@ const player = {
     
 }
 
-let xpos = 50;
+
 
 class Platform {
     constructor (x, y, w, h, t) {
@@ -128,9 +134,7 @@ class Platform {
     }
 }
 
-const gravity = 0.2;
-const floor = 260;
-let clicking = false;
+
 
 let bh_sprite = two.makeSprite('resc/sprites/sbh.png',50,0,6,1,10,false);
 let th_sprite = two.makeSprite('resc/sprites/sth.png',50,0,12,1,10,false);
@@ -156,11 +160,11 @@ bh_sprite.play(0,5);
 th_sprite.play(0,5);
 
 
-window.addEventListener("contextmenu", (event) => {
-    event.preventDefault()
-    th_jump();
+// window.addEventListener("contextmenu", (event) => {
+//     event.preventDefault()
+//     th_jump();
     
-})
+// })
 
 // window.addEventListener("click", (event) => {
 //     bh_jump();
