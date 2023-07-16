@@ -2,14 +2,17 @@ const width = 800;
 const height = 500;
 const hspeed = 2;
 const dilation = 0.1;
-const start_height = 300;
+const start_height = 400;
 const gravity = 0.2;
 const floor = 260;
+const start_x = 50;
+const end_x = 2520;
 
 let clicking = false;
-let xpos = 50;
+let xpos = start_x;
 let top_jump_down = false;
 let bottom_jump_down = false;
+
 
 
 let params = {
@@ -97,6 +100,25 @@ function check_collision(old_x, old_y, new_x, new_y, platform, top_half) {
     return 0
 }
 
+function reset() {
+    player.th.y = start_height;
+    player.th.yv = 0;
+    player.th.grounded = false;
+    player.th.hanging = false;
+    th_sprite.stop()
+    bh_sprite.stop()
+    th_sprite.play(0,5)
+    bh_sprite.play(0,5)
+
+    player.bh.y = start_height;
+    player.bh.yv = 0;
+    player.bh.grounded = false;
+
+    player.connected = true;
+
+    xpos = start_x;
+}
+
 const player = {
     th: {
         y: start_height,
@@ -110,7 +132,6 @@ const player = {
         grounded: false
     },
     connected: true
-    
 }
 
 
@@ -127,6 +148,8 @@ class Platform {
         }
         else if (t == 2) {
             this.rect.fill = rgb(50,50,200);
+        } else if (t == 3) {
+            this.rect.fill = rgb(50,200,50);
         } else {
             this.rect.fill = rgb(50,50,50);
         }
@@ -141,15 +164,32 @@ let th_sprite = two.makeSprite('resc/sprites/sth.png',50,0,12,1,10,false);
 console.log(bh_sprite)
 
 const platforms = [];
-platforms.push(new Platform(500,400,300,18, 0))
-//platforms.push(new Platform(500,425,300,18, 0))
-platforms.push(new Platform(800,300,300,18, 2))
-platforms.push(new Platform(800,360,300,18, 1))
-platforms.push(new Platform(1200,400,300,18, 1))
-platforms.push(new Platform(1400,380,300,18, 2))
-platforms.push(new Platform(2000,300,300,18, 0))
-// platforms.push(new Platform(1600,400,2000,18,0))
-// platforms.push(new Platform(1900,350,2000,18,0))
+// platforms.push(new Platform(500,400,300,18, 0))
+// platforms.push(new Platform(500,425,300,18, 0))
+// platforms.push(new Platform(800,300,300,18, 2))
+// platforms.push(new Platform(800,360,300,18, 1))
+// platforms.push(new Platform(1200,400,300,18, 1))
+// platforms.push(new Platform(1400,380,300,18, 2))
+// platforms.push(new Platform(2000,300,300,18, 0))
+platforms.push(new Platform(end_x + 25,height/2,30,height, 3))
+platforms.push(new Platform(100,475,200,50,0))
+platforms.push(new Platform(400,475,150,50,0))
+platforms.push(new Platform(900,475,550,50,0))
+platforms.push(new Platform(900,380,20,150,2))
+platforms.push(new Platform(900,230,20,150,1))
+platforms.push(new Platform(1400,100,550,50,0))
+platforms.push(new Platform(1175,-100,100,350,0))
+platforms.push(new Platform(1500,475,400,50,0))
+platforms.push(new Platform(1325,300,50,300,2))
+platforms.push(new Platform(1900,475,400,50,0))
+platforms.push(new Platform(1610,150,20,50,2))
+platforms.push(new Platform(1750,300,20,300,2))
+platforms.push(new Platform(2330,375,400,25,0))
+platforms.push(new Platform(2330,275,400,25,0))
+platforms.push(new Platform(2330,175,400,25,0))
+platforms.push(new Platform(2500,225,20,80,1))
+platforms.push(new Platform(2500,325,20,80,2))
+platforms.push(new Platform(2155,0,50,375,0))
 
 
 //console.log(platforms[0])
@@ -203,9 +243,9 @@ function update(frameCount) {
     }
     
 
-    bhroof = 0
+    bhroof = -1000
     bhfloor = height-36
-    throof = 0
+    throof = -1000
     newbh = Math.min(player.bh.y + player.bh.yv * two.timeDelta * dilation,bhfloor);
     newth = Math.min(player.th.y + player.th.yv * two.timeDelta * dilation,newbh);
     thfloor = newbh
@@ -214,6 +254,9 @@ function update(frameCount) {
         r = check_collision(xpos, player.bh.y, xpos+hspeed*two.timeDelta*dilation, newbh, p, false)
         if (r == -2) {
             console.log('bottom died')
+            two.pause();
+            reset();
+            two.play();
         }
         else if (r == -1) {
         }
@@ -229,6 +272,9 @@ function update(frameCount) {
         r = check_collision(xpos, player.th.y, xpos+hspeed*two.timeDelta*dilation, newth, p, true)
         if (r == -2) {
             console.log('top died')
+            two.pause();
+            reset();
+            two.play();
         }
         else if (r == -1) {
         }
@@ -242,7 +288,7 @@ function update(frameCount) {
         }
         
 
-        p.rect.position.x = p.x + 50 - xpos
+        p.rect.position.x = p.x + start_x - xpos
     }
 
     newbh = Math.min(player.bh.y + player.bh.yv * two.timeDelta * dilation,bhfloor);
@@ -254,9 +300,18 @@ function update(frameCount) {
     player.bh.y = newbh
     player.th.y = newth
 
+    if (xpos > end_x) {
+        two.pause();
+    }
+    if (player.bh.y == height - 36) {
+        two.pause();
+        reset();
+        two.play();
+    }
+
     bh_sprite.position.y = player.bh.y
     th_sprite.position.y = player.th.y
-    if (player.th.y - player.bh.y < 5 && player.th.hanging) { // shitty graphics workaround
+    if (player.bh.y - player.th.y < 5 && player.th.hanging) { // shitty graphics workaround
         bh_sprite.position.y -= 2
     }
     //console.log(player.th.y, player.bh.y)
