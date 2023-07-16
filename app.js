@@ -1,6 +1,7 @@
 const width = 800;
 const height = 500;
 const hspeed = 2;
+const dilation = 0.1;
 
 let top_jump_down = false;
 let bottom_jump_down = false;
@@ -187,8 +188,8 @@ window.addEventListener('keyup', (event) => {
 
 
 function update(frameCount) {
-    player.th.yv += gravity;
-    player.bh.yv += gravity;
+    player.th.yv += gravity * two.timeDelta * dilation * !player.th.hanging;
+    player.bh.yv += gravity * two.timeDelta * dilation;
 
     if (bottom_jump_down) {
         bh_jump();
@@ -201,12 +202,12 @@ function update(frameCount) {
     bhroof = 0
     bhfloor = height-36
     throof = 0
-    newbh = Math.min(player.bh.y + player.bh.yv,bhfloor);
-    newth = Math.min(player.th.y + player.th.yv,newbh);
+    newbh = Math.min(player.bh.y + player.bh.yv * two.timeDelta * dilation,bhfloor);
+    newth = Math.min(player.th.y + player.th.yv * two.timeDelta * dilation,newbh);
     thfloor = newbh
 
     for (p of platforms) {
-        r = check_collision(xpos, player.bh.y, xpos+hspeed, newbh, p, false)
+        r = check_collision(xpos, player.bh.y, xpos+hspeed*two.timeDelta*dilation, newbh, p, false)
         if (r == -2) {
             console.log('bottom died')
         }
@@ -221,7 +222,7 @@ function update(frameCount) {
         }
         
 
-        r = check_collision(xpos, player.th.y, xpos+hspeed, newth, p, true)
+        r = check_collision(xpos, player.th.y, xpos+hspeed*two.timeDelta*dilation, newth, p, true)
         if (r == -2) {
             console.log('top died')
         }
@@ -240,12 +241,12 @@ function update(frameCount) {
         p.rect.position.x = p.x + 50 - xpos
     }
 
-    newbh = Math.min(player.bh.y + player.bh.yv,bhfloor);
-    newth = Math.min(player.th.y + player.th.yv,thfloor, newbh);
+    newbh = Math.min(player.bh.y + player.bh.yv * two.timeDelta * dilation,bhfloor);
+    newth = Math.min(player.th.y + player.th.yv * two.timeDelta * dilation,thfloor, newbh);
     newth = Math.max(newth, throof);
     newbh = Math.max(newbh, bhroof, newth);
 
-    xpos += hspeed
+    xpos += hspeed*two.timeDelta*dilation
     player.bh.y = newbh
     player.th.y = newth
 
@@ -286,14 +287,14 @@ function update(frameCount) {
             player.bh.yv = 0;
         }
         if (top_jump_down) {
-            player.th.yv -= gravity;
+            //player.th.yv -= gravity * two.timeDelta * dilation;
             player.th.hanging = true;
         }
     }
     if (player.th.y == thfloor) {
         player.th.grounded = true;
         if (player.connected == false && player.th.yv > 0) {
-            if (player.th.yv > gravity) {
+            if (player.th.yv > gravity * two.timeDelta * dilation ) {
                 th_sprite.play(0,5);
             }
             player.th.yv = 0;
