@@ -1,6 +1,6 @@
 const width = 800;
 const height = 500;
-const hspeed = 2;
+const hspeed = 2.8;
 const dilation = 0.1;
 const start_height = 400;
 const gravity = 0.2;
