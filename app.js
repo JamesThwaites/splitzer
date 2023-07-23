@@ -4,7 +4,6 @@ const hspeed = 2.8;
 const dilation = 0.1;
 const start_height = 400;
 const gravity = 0.2;
-const floor = 260;
 const start_x = 50;
 const end_x = 2520;
 
@@ -24,7 +23,7 @@ let elem = document.body;
 let two = new Two(params).appendTo(elem);
 console.log(two)
 
-let background = two.makeRectangle(width/2,height/2,width-4,height-4);
+let background = two.makeRectangle(width/2,height/2,width-1,height-1);
 background.fill = rgb(255,252,208);
 
 
@@ -145,11 +144,14 @@ class Platform {
         this.rect = two.makeRectangle(x,y,w,h);
         if (t == 1) {
             this.rect.fill = rgb(200,50,50);
+            this.rect.stroke = rgb(50,50,50);
         }
         else if (t == 2) {
             this.rect.fill = rgb(50,50,200);
+            this.rect.stroke = rgb(50,50,50);
         } else if (t == 3) {
             this.rect.fill = rgb(50,200,50);
+            this.rect.stroke = rgb(50,50,50);
         } else {
             this.rect.fill = rgb(50,50,50);
         }
@@ -232,6 +234,7 @@ window.addEventListener('keyup', (event) => {
 
 
 function update(frameCount) {
+    reset_flag = false;
     player.th.yv += gravity * two.timeDelta * dilation * !player.th.hanging;
     player.bh.yv += gravity * two.timeDelta * dilation;
 
@@ -254,9 +257,7 @@ function update(frameCount) {
         r = check_collision(xpos, player.bh.y, xpos+hspeed*two.timeDelta*dilation, newbh, p, false)
         if (r == -2) {
             console.log('bottom died')
-            two.pause();
-            reset();
-            two.play();
+            reset_flag = true;
         }
         else if (r == -1) {
         }
@@ -272,9 +273,7 @@ function update(frameCount) {
         r = check_collision(xpos, player.th.y, xpos+hspeed*two.timeDelta*dilation, newth, p, true)
         if (r == -2) {
             console.log('top died')
-            two.pause();
-            reset();
-            two.play();
+            reset_flag = true;
         }
         else if (r == -1) {
         }
@@ -304,9 +303,7 @@ function update(frameCount) {
         two.pause();
     }
     if (player.bh.y == height - 36) {
-        two.pause();
-        reset();
-        two.play();
+        reset_flag = true;
     }
 
     bh_sprite.position.y = player.bh.y
@@ -375,4 +372,8 @@ function update(frameCount) {
         player.bh.grounded = false;
     }
 
+
+    if (reset_flag) {
+        reset();
+    }
 }
